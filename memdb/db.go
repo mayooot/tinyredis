@@ -31,11 +31,20 @@ func (m *MemDb) ExecCommand(cmd [][]byte) RESP.RedisData {
 	if len(cmd) == 0 {
 		return nil
 	}
+
+	var cmds []string
+	for _, bytes := range cmd {
+		cmds = append(cmds, string(bytes))
+	}
+	joinedCmds := strings.Join(cmds, " ")
+
 	var res RESP.RedisData
-	cmdName := strings.ToLower(string(cmd[0]))
-	command, ok := CmdTable[cmdName]
+	//cmdName := strings.ToLower(string(cmd[0]))
+	command, ok := CmdTable[joinedCmds]
 	if !ok {
-		res = RESP.MakeErrorData("error: unsupported command")
+		//res = RESP.MakeErrorData("error: unsupported command")
+		execFunc := command.executor
+		res = execFunc(m, cmd)
 	} else {
 		execFunc := command.executor
 		res = execFunc(m, cmd)

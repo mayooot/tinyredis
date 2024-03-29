@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/hsn/tiny-redis/RESP"
 	"io"
 	"net"
@@ -42,6 +43,11 @@ func (h *Handler) Handle(conn net.Conn) {
 			continue
 		}
 		cmd := arrayData.ToCommand()
+		var cmds []string
+		for _, bytes := range cmd {
+			cmds = append(cmds, string(bytes))
+		}
+		fmt.Println("receive command:", cmds)
 		res := h.memDb.ExecCommand(cmd)
 		if res != nil {
 			_, err := conn.Write(res.ToBytes())
